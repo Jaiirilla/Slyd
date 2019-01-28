@@ -157,6 +157,18 @@ void setIsOnLockscreen(bool isIt) {
 
 %end
 
+/* Move time/date with slide to unlock */
+
+%hook SBDashBoardTodayPageViewController
+
+-(void)aggregateAppearance:(id)arg1 {
+    %orig;
+    SBDashBoardComponent *dateView = [[NSClassFromString(@"SBDashBoardComponent") dateView] hidden:YES];
+    [arg1 addComponent:dateView];
+}
+
+%end
+
 %hook SBDashBoardFixedFooterViewController
 
 -(id)init {

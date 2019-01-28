@@ -1,11 +1,20 @@
 #import "../Common.h"
 #import <Cephei/HBPreferences.h>
 
-@interface SBDashBoardPageControl : UIView 
+@interface SBDashBoardComponent : NSObject
++(id)dateView;
+-(id)hidden:(BOOL)arg1 ;
+@end
+
+@interface SBDashBoardAppearance : NSObject
+-(void)addComponent:(id)arg1;
+@end
+
+@interface SBDashBoardPageControl : UIView
 -(void)stuStateChanged;
 @end
 
-@interface SBDashBoardTodayContentView : UIView 
+@interface SBDashBoardTodayContentView : UIView
 -(void)stuStateChanged;
 @end
 
@@ -54,11 +63,11 @@
 
 }
 
-@property (nonatomic,readonly) UIView * fixedFooterView; 
-@property (readonly) unsigned long long hash; 
-@property (readonly) Class superclass; 
-@property (copy,readonly) NSString * description; 
-@property (copy,readonly) NSString * debugDescription; 
+@property (nonatomic,readonly) UIView * fixedFooterView;
+@property (readonly) unsigned long long hash;
+@property (readonly) Class superclass;
+@property (copy,readonly) NSString * description;
+@property (copy,readonly) NSString * debugDescription;
 +(Class)viewClass;
 -(void)dashBoardStatusTextViewControllerContentDidChange:(id)arg1 ;
 -(UIView *)fixedFooterView;
@@ -90,11 +99,11 @@
 
 @property (readonly) BOOL isUILocked;                                                                                                                     //@synthesize isUILocked=_isUILocked - In the implementation block
 @property (readonly) BOOL isWaitingToLockUI;                                                                                                              //@synthesize isWaitingToLockUI=_isWaitingToLockUI - In the implementation block
-@property (readonly) BOOL shouldHandlePocketStateChanges; 
-@property (readonly) BOOL shouldPlayLockSound; 
-@property (readonly) BOOL isLockScreenActive; 
-@property (readonly) BOOL isLockScreenVisible; 
-@property (readonly) BOOL bioAuthenticatedWhileMenuButtonDown; 
+@property (readonly) BOOL shouldHandlePocketStateChanges;
+@property (readonly) BOOL shouldPlayLockSound;
+@property (readonly) BOOL isLockScreenActive;
+@property (readonly) BOOL isLockScreenVisible;
+@property (readonly) BOOL bioAuthenticatedWhileMenuButtonDown;
 
 +(Class)safeCategoryBaseClass;
 +(id)_sharedInstanceCreateIfNeeded:(BOOL)arg1 ;
