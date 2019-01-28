@@ -1,6 +1,12 @@
 #import "../Common.h"
 #import <Cephei/HBPreferences.h>
 
+@interface SBDashBoardPasscodeViewController : UIViewController
+@end
+
+@interface SBDashBoardTodayPageViewController : UIViewController
+@end
+
 @interface SBDashBoardComponent : NSObject
 +(id)dateView;
 -(id)hidden:(BOOL)arg1 ;
