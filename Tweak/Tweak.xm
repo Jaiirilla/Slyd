@@ -306,6 +306,20 @@ void setIsOnLockscreen(bool isIt) {
 
 %end
 
+/* Force enable today view */
+
+%hook SBMainDisplayPolicyAggregator
+
+-(BOOL)_allowsCapabilityLockScreenTodayViewWithExplanation:(id*)arg1 {
+    return true;
+}
+
+-(BOOL)_allowsCapabilityTodayViewWithExplanation:(id*)arg1 {
+    return true;
+}
+
+%end
+
 %end
 
 %group SlydIntegrityFail
