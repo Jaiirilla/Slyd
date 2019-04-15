@@ -1,12 +1,14 @@
 #import "Tweak.h"
 
 /* Config */
-static bool enabled = true;
-static bool showChevron = true;
-static bool disableHome = true;
-static bool disableSwipe = true;
-static NSInteger appearance = 0; // 0 - auto; 1 - light; 2 - dark
-static NSString *text = @"slide to unlock";
+HBPreferences *preferences;
+BOOL dpkgInvalid = false;
+BOOL enabled;
+BOOL showChevron;
+BOOL disableHome;
+BOOL disableSwipe;
+NSInteger appearance; // 0 - auto; 1 - light; 2 - dark
+NSString *text;
 
 /* Random stuff to keep track of */
 static SBPagedScrollView *psv = nil;
@@ -298,32 +300,61 @@ void setIsOnLockscreen(bool isIt) {
 
 %end
 
+%group SlydIntegrityFail
+
+%hook SpringBoard
+
+-(void)applicationDidFinishLaunching:(id)arg1 {
+    %orig;
+    if (!dpkgInvalid) return;
+    UIAlertController *alertController = [UIAlertController
+        alertControllerWithTitle:@"😡😡😡"
+        message:@"The build of Slyd you're using comes from an untrusted source. Pirate repositories can distribute malware and you will get subpar user experience using any tweaks from them.\nRemember: Slyd is free. Uninstall this build and install the proper version of Slyd from:\nhttps://repo.nepeta.me/\n(it's free, damnit, why would you pirate that!?)"
+        preferredStyle:UIAlertControllerStyleAlert
+    ];
+
+     [alertController addAction:[UIAlertAction actionWithTitle:@"Damn!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        [((UIApplication*)self).keyWindow.rootViewController dismissViewControllerAnimated:YES completion:NULL];
+    }]];
+
+     [((UIApplication*)self).keyWindow.rootViewController presentViewController:alertController animated:YES completion:NULL];
+}
+
+%end
+
+%end
+
 static void displayStatusChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
     setIsOnLockscreen(true);
 }
 
-static void reloadPreferences() {
-    HBPreferences *file = [[HBPreferences alloc] initWithIdentifier:@"me.nepeta.slyd"];
-    enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
-    showChevron = [([file objectForKey:@"ShowChevron"] ?: @(YES)) boolValue];
-    disableHome = [([file objectForKey:@"DisableHome"] ?: @(YES)) boolValue];
-    disableSwipe = [([file objectForKey:@"DisableSwipe"] ?: @(YES)) boolValue];
-    appearance = [([file objectForKey:@"Appearance"] ?: @(0)) intValue];
-    text = [file objectForKey:@"Text"];
-    if (!text) text = @"slide to unlock";
+%ctor{
+    dpkgInvalid = ![[NSFileManager defaultManager] fileExistsAtPath:@"/var/lib/dpkg/info/me.nepeta.slyd.list"];
 
-    if (sdbmpv) {
-        [sdbmpv.stuGlintyStringView setText:text];
-        [sdbmpv.stuGlintyStringView setNeedsTextUpdate:true];
-        [sdbmpv.stuGlintyStringView updateText];
+    if (dpkgInvalid) {
+        %init(SlydIntegrityFail);
+        return;
     }
 
-    setIsOnLockscreen(isOnLockscreen);
-}
+    preferences = [[HBPreferences alloc] initWithIdentifier:@"me.nepeta.slyd"];
 
-%ctor{
-    reloadPreferences();
-    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPreferences, (CFStringRef)@"me.nepeta.slyd/ReloadPrefs", NULL, (CFNotificationSuspensionBehavior)kNilOptions);
+    [preferences registerBool:&enabled default:YES forKey:@"Enabled"];
+    [preferences registerBool:&showChevron default:YES forKey:@"ShowChevron"];
+    [preferences registerBool:&disableHome default:YES forKey:@"DisableHome"];
+    [preferences registerBool:&disableSwipe default:YES forKey:@"DisableSwipe"];
+    [preferences registerInteger:&appearance default:0 forKey:@"Appearance"];
+    [preferences registerObject:&text default:@"slide to unlock" forKey:@"Text"];
+
+    [preferences registerPreferenceChangeBlock:^() {
+        if (sdbmpv) {
+            [sdbmpv.stuGlintyStringView setText:text];
+            [sdbmpv.stuGlintyStringView setNeedsTextUpdate:true];
+            [sdbmpv.stuGlintyStringView updateText];
+        }
+
+        setIsOnLockscreen(isOnLockscreen);
+    }];
+
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, displayStatusChanged, CFSTR("com.apple.iokit.hid.displayStatus"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 
     %init(SlideToUnlock);
