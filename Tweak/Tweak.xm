@@ -180,7 +180,7 @@ void setIsOnLockscreen(bool isIt) {
 %hook SBDashBoardTodayPageViewController
 /* Blurry dark passcode page background */
 -(long long)backgroundStyle  {
-    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([objc_getClass("SBLockStateAggregator") sharedInstance], "_lockState") == 3) {
+    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([%c(SBLockStateAggregator) sharedInstance], "_lockState") == 3) {
         return 6;
     } else {
       return %orig;
@@ -191,7 +191,7 @@ void setIsOnLockscreen(bool isIt) {
     %orig;
     /* Move time/date with slide to unlock */
     if (isOnLockscreen && enabled) {
-        SBDashBoardComponent *dateView = [[NSClassFromString(@"SBDashBoardComponent") dateView] hidden:YES];
+        SBDashBoardComponent *dateView = [[%c(SBDashBoardComponent) dateView] hidden:YES];
         [arg1 addComponent:dateView];
     }
 
@@ -208,7 +208,7 @@ void setIsOnLockscreen(bool isIt) {
         [self addChildViewController:passController];
         [passController didMoveToParentViewController:self];
     }
-    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([objc_getClass("SBLockStateAggregator") sharedInstance], "_lockState") == 3) {
+    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([%c(SBLockStateAggregator) sharedInstance], "_lockState") == 3) {
         passController.view.hidden = NO;
         [passController performCustomTransitionToVisible:true withAnimationSettings:nil completion:nil];
     } else {
@@ -313,11 +313,11 @@ void setIsOnLockscreen(bool isIt) {
         preferredStyle:UIAlertControllerStyleAlert
     ];
 
-     [alertController addAction:[UIAlertAction actionWithTitle:@"Damn!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Damn!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         [((UIApplication*)self).keyWindow.rootViewController dismissViewControllerAnimated:YES completion:NULL];
     }]];
 
-     [((UIApplication*)self).keyWindow.rootViewController presentViewController:alertController animated:YES completion:NULL];
+    [((UIApplication*)self).keyWindow.rootViewController presentViewController:alertController animated:YES completion:NULL];
 }
 
 %end
