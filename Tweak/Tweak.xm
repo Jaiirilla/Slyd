@@ -180,10 +180,10 @@ void setIsOnLockscreen(bool isIt) {
 %hook SBDashBoardTodayPageViewController
 /* Blurry dark passcode page background */
 -(long long)backgroundStyle  {
-    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([%c(SBLockStateAggregator) sharedInstance], "_lockState") == 3) {
+    if (isOnLockscreen && enabled) {
         return 6;
     } else {
-      return %orig;
+        return %orig;
     }
 }
 
