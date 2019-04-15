@@ -195,13 +195,9 @@ void setIsOnLockscreen(bool isIt) {
         [arg1 addComponent:dateView];
     }
 
-    /* Create new passcode view on today page */
-    /* BUGS: Touch ID doesn't work on the (new) passcode page,
-             Pressing home will make the default passcode page popup, even over the new one*/
     if (!passController) {
-        passController = [sbdbvc _passcodeViewController];
-        if (!passController) return;
-        [passController.view removeFromSuperview];
+        passController = [[%c(SBDashBoardPasscodeViewController) alloc] init];
+        passController.title = @"Slyd";
         [self.view addSubview:passController.view];
         passController.view.frame = CGRectMake(0,0,[UIScreen mainScreen].bounds.size.width,[UIScreen mainScreen].bounds.size.height);
         MSHookIvar<UIView *>(passController, "_backgroundView").hidden = YES;
@@ -214,6 +210,18 @@ void setIsOnLockscreen(bool isIt) {
     } else {
         passController.view.hidden = YES;
     }
+}
+
+%end
+
+%hook SBDashBoardPasscodeViewController
+
+-(void)performCustomTransitionToVisible:(BOOL)arg1 withAnimationSettings:(id)arg2 completion:(/*^block*/id)arg3 { 
+    if (![self.title isEqualToString:@"Slyd"]) {
+        arg1 = false;
+        [self.view removeFromSuperview];
+    }
+    %orig;
 }
 
 %end
