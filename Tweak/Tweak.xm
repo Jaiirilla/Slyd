@@ -17,6 +17,8 @@ static bool preventHome = false;
 static bool isOnLockscreen = true;
 static bool canUnlock = false;
 
+static UIViewController *passController;
+
 void setIsOnLockscreen(bool isIt) {
     isOnLockscreen = isIt;
     preventHome = false;
@@ -89,7 +91,8 @@ void setIsOnLockscreen(bool isIt) {
     return orig;
 }
 
--(void)_bs_didScrollWithContext:(id)arg1 {
+// Only unlocks on finger release
+- (void)_bs_didEndScrolling {
     %orig;
     if (self.currentPageIndex == 0 && self.pageRelativeScrollOffset < 0.50
             && !preventHome && isOnLockscreen && enabled) {
@@ -152,6 +155,44 @@ void setIsOnLockscreen(bool isIt) {
     } else {
         self.alpha = 1.0;
         self.hidden = NO;
+    }
+}
+
+%end
+
+%hook SBDashBoardTodayPageViewController
+/* Blurry dark passcode page background */
+-(long long)backgroundStyle  {
+    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([objc_getClass("SBLockStateAggregator") sharedInstance], "_lockState") == 3) {
+        return 6;
+    } else {
+      return %orig;
+    }
+}
+
+-(void)aggregateAppearance:(id)arg1 {
+    %orig;
+    /* Move time/date with slide to unlock */
+    if (isOnLockscreen && enabled) {
+        SBDashBoardComponent *dateView = [[NSClassFromString(@"SBDashBoardComponent") dateView] hidden:YES];
+        [arg1 addComponent:dateView];
+    }
+
+    /* Create new passcode view on today page */
+    /* BUGS: Touch ID doesn't work on the (new) passcode page,
+             Pressing home will make the default passcode page popup, even over the new one*/
+    if (!passController) {
+        passController = [[NSClassFromString(@"SBDashBoardPasscodeViewController") alloc] init];
+	    	[self.view addSubview:passController.view];
+	    	passController.view.frame = CGRectMake(0,0,[UIScreen mainScreen].bounds.size.width,[UIScreen mainScreen].bounds.size.height);
+        MSHookIvar<UIView *>(passController, "_backgroundView").hidden = YES;
+	    	[self addChildViewController:passController];
+        [passController didMoveToParentViewController:self];
+    }
+    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([objc_getClass("SBLockStateAggregator") sharedInstance], "_lockState") == 3) {
+        passController.view.hidden = NO;
+    } else {
+        passController.view.hidden = YES;
     }
 }
 
