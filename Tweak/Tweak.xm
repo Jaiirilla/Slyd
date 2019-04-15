@@ -5,6 +5,7 @@ static bool enabled = true;
 static bool showChevron = true;
 static bool disableHome = true;
 static bool disableSwipe = true;
+static NSInteger appearance = 0; // 0 - auto; 1 - light; 2 - dark
 static NSString *text = @"slide to unlock";
 
 /* Random stuff to keep track of */
@@ -62,8 +63,21 @@ void setIsOnLockscreen(bool isIt) {
         } else {
             [self.stuGlintyStringView setChevronStyle:0];
         }
+
         [self.stuGlintyStringView hide];
         [self.stuGlintyStringView show];
+        
+        UIColor *primaryColor = [UIColor colorWithRed:0.38 green:0.38 blue:0.38 alpha:1.0];
+        if (appearance == 0 && sbdbvc && [sbdbvc legibilitySettings]) {
+            CGFloat white = 0;
+            CGFloat alpha = 0;
+            [[sbdbvc legibilitySettings].primaryColor getWhite:&white alpha:&alpha];
+            if (white == 1) primaryColor = [UIColor colorWithRed:0.99 green:0.99 blue:0.99 alpha:1.0];
+        } else if (appearance == 1) {
+            primaryColor = [UIColor colorWithRed:0.99 green:0.99 blue:0.99 alpha:1.0];
+        }
+
+        self.stuGlintyStringView.layer.sublayers[0].sublayers[2].backgroundColor = [primaryColor colorWithAlphaComponent:0.65].CGColor;
     } else {
         [self.stuGlintyStringView hide];
         [self.stuGlintyStringView removeFromSuperview];
@@ -294,6 +308,7 @@ static void reloadPreferences() {
     showChevron = [([file objectForKey:@"ShowChevron"] ?: @(YES)) boolValue];
     disableHome = [([file objectForKey:@"DisableHome"] ?: @(YES)) boolValue];
     disableSwipe = [([file objectForKey:@"DisableSwipe"] ?: @(YES)) boolValue];
+    appearance = [([file objectForKey:@"Appearance"] ?: @(0)) intValue];
     text = [file objectForKey:@"Text"];
     if (!text) text = @"slide to unlock";
 

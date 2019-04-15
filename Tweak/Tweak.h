@@ -30,11 +30,16 @@
 -(void)stuStateChanged;
 @end
 
+@interface _UILegibilitySettings : NSObject
+@property (nonatomic,retain) UIColor * primaryColor; 
+@end
+
 @interface SBDashBoardViewController : UIViewController
 @property (assign,getter=isAuthenticated,nonatomic) BOOL authenticated;
 -(id)_passcodeViewController;
 -(id)initWithPageViewControllers:(id)arg1 mainPageContentViewController:(id)arg2 ;
 -(id)initWithPageViewControllers:(id)arg1 mainPageContentViewController:(id)arg2 legibilityProvider:(id)arg3 ;
+@property (nonatomic,readonly) _UILegibilitySettings * legibilitySettings; 
 
 @end
 

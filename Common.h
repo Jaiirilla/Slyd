@@ -74,6 +74,7 @@
 -(void)hide;
 -(BOOL)showing;
 -(void)show;
+-(void)setLegibilitySettings:(id)arg1;
 -(void)setBackgroundColor:(UIColor *)arg1 ;
 -(UIColor *)backgroundColor;
 -(void)dealloc;
