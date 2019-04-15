@@ -2,6 +2,12 @@
 #import <Cephei/HBPreferences.h>
 
 @interface SBDashBoardPasscodeViewController : UIViewController
+-(void)performCustomTransitionToVisible:(BOOL)arg1 withAnimationSettings:(id)arg2 completion:(/*^block*/id)arg3 ;
+-(void)aggregateBehavior:(id)arg1 ;
+-(id)displayLayoutElementIdentifier;
+-(void)setUseBiometricPresentation:(BOOL)arg1 ;
+-(void)setBiometricButtonsInitiallyVisible:(BOOL)arg1 ;
+
 @end
 
 @interface SBDashBoardTodayPageViewController : UIViewController
@@ -26,6 +32,9 @@
 
 @interface SBDashBoardViewController : UIViewController
 @property (assign,getter=isAuthenticated,nonatomic) BOOL authenticated;
+-(id)_passcodeViewController;
+-(id)initWithPageViewControllers:(id)arg1 mainPageContentViewController:(id)arg2 ;
+-(id)initWithPageViewControllers:(id)arg1 mainPageContentViewController:(id)arg2 legibilityProvider:(id)arg3 ;
 
 @end
 

@@ -13,11 +13,12 @@ static SBDashBoardMainPageView *sdbmpv = nil;
 static SBDashBoardTodayContentView *sdbtcv = nil;
 static SBDashBoardFixedFooterViewController *sdbffvc = nil;
 static SBDashBoardTeachableMomentsContainerViewController *sdbtmcvc = nil;
+static SBDashBoardViewController *sbdbvc = nil;
 static bool preventHome = false;
 static bool isOnLockscreen = true;
 static bool canUnlock = false;
 
-static UIViewController *passController;
+static SBDashBoardPasscodeViewController *passController;
 
 void setIsOnLockscreen(bool isIt) {
     isOnLockscreen = isIt;
@@ -182,15 +183,18 @@ void setIsOnLockscreen(bool isIt) {
     /* BUGS: Touch ID doesn't work on the (new) passcode page,
              Pressing home will make the default passcode page popup, even over the new one*/
     if (!passController) {
-        passController = [[NSClassFromString(@"SBDashBoardPasscodeViewController") alloc] init];
-	    	[self.view addSubview:passController.view];
-	    	passController.view.frame = CGRectMake(0,0,[UIScreen mainScreen].bounds.size.width,[UIScreen mainScreen].bounds.size.height);
+        passController = [sbdbvc _passcodeViewController];
+        if (!passController) return;
+        [passController.view removeFromSuperview];
+        [self.view addSubview:passController.view];
+        passController.view.frame = CGRectMake(0,0,[UIScreen mainScreen].bounds.size.width,[UIScreen mainScreen].bounds.size.height);
         MSHookIvar<UIView *>(passController, "_backgroundView").hidden = YES;
-	    	[self addChildViewController:passController];
+        [self addChildViewController:passController];
         [passController didMoveToParentViewController:self];
     }
     if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([objc_getClass("SBLockStateAggregator") sharedInstance], "_lockState") == 3) {
         passController.view.hidden = NO;
+        [passController performCustomTransitionToVisible:true withAnimationSettings:nil completion:nil];
     } else {
         passController.view.hidden = YES;
     }
@@ -258,6 +262,22 @@ void setIsOnLockscreen(bool isIt) {
     %orig;
 
     setIsOnLockscreen(!self.authenticated);
+}
+
+-(id)initWithPageViewControllers:(id)arg1 mainPageContentViewController:(id)arg2 {
+    id orig = %orig;
+    sbdbvc = orig;
+    return orig;
+}
+
+-(id)initWithPageViewControllers:(id)arg1 mainPageContentViewController:(id)arg2 legibilityProvider:(id)arg3  {
+    id orig = %orig;
+    sbdbvc = orig;
+    return orig;
+}
+
+-(BOOL)isPasscodeLockVisible {
+    return true;
 }
 
 %end
