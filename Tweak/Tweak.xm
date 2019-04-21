@@ -189,8 +189,10 @@ void setIsOnLockscreen(bool isIt) {
 
 -(void)aggregateAppearance:(id)arg1 {
     %orig;
+    if (!enabled) return;
+
     /* Move time/date with slide to unlock */
-    if (isOnLockscreen && enabled) {
+    if (isOnLockscreen) {
         SBDashBoardComponent *dateView = [[%c(SBDashBoardComponent) dateView] hidden:YES];
         [arg1 addComponent:dateView];
     }
@@ -204,7 +206,7 @@ void setIsOnLockscreen(bool isIt) {
         [self addChildViewController:passController];
         [passController didMoveToParentViewController:self];
     }
-    if (isOnLockscreen && enabled && MSHookIvar<NSUInteger>([%c(SBLockStateAggregator) sharedInstance], "_lockState") == 3) {
+    if (isOnLockscreen && MSHookIvar<NSUInteger>([%c(SBLockStateAggregator) sharedInstance], "_lockState") == 3) {
         passController.view.hidden = NO;
         [passController performCustomTransitionToVisible:true withAnimationSettings:nil completion:nil];
     } else {
@@ -217,7 +219,7 @@ void setIsOnLockscreen(bool isIt) {
 %hook SBDashBoardPasscodeViewController
 
 -(void)performCustomTransitionToVisible:(BOOL)arg1 withAnimationSettings:(id)arg2 completion:(/*^block*/id)arg3 { 
-    if (![self.title isEqualToString:@"Slyd"]) {
+    if (enabled && ![self.title isEqualToString:@"Slyd"]) {
         arg1 = false;
         [self.view removeFromSuperview];
     }
@@ -301,6 +303,7 @@ void setIsOnLockscreen(bool isIt) {
 }
 
 -(BOOL)isPasscodeLockVisible {
+    if (!enabled) return %orig;
     return true;
 }
 
@@ -311,10 +314,12 @@ void setIsOnLockscreen(bool isIt) {
 %hook SBMainDisplayPolicyAggregator
 
 -(BOOL)_allowsCapabilityLockScreenTodayViewWithExplanation:(id*)arg1 {
+    if (!enabled) return %orig;
     return true;
 }
 
 -(BOOL)_allowsCapabilityTodayViewWithExplanation:(id*)arg1 {
+    if (!enabled) return %orig;
     return true;
 }
 
